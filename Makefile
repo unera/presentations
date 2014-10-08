@@ -6,7 +6,6 @@ highload.pdf: highload.tex
 	mkdir obj
 	cd obj \
             && pdflatex -output-format pdf ../$< \
-            && pdflatex -output-format pdf ../$< \
             && mv $@ ..
 	rm -fr obj
 

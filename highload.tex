@@ -36,7 +36,7 @@
         \pause
         \item $53.328 * 10^9$  запросов в секунду?
             \pause
-            - средний CPU
+            {\small - средний CPU}
 
         \pause
         \item Более реалистично!
@@ -44,10 +44,9 @@
         \pause
         \item 1 запрос в секунду?
             \pause
-            веб сервер...
+            - любой веб сервер?...
             \pause
-            перекодирующий видеоролики
-
+            \par {\small перекодирующий видеоролики? :)}
     \end{itemize}
 \end{frame}
 
@@ -59,51 +58,346 @@
 \end{frame}
 
 \begin{frame}{Когда это бывает?}
+    \pause
+    {\large Достигнуты технические ограничения}
     \begin{itemize}
         \pause
-        \item Достигнуты технические ограничения
-            \begin{itemize}
-                \pause
-                \item Сеть
-                
-                \pause
-                \item Память
-                
-                \pause
-                \item CPU
-            \end{itemize}
+        \item Сеть
+            \pause {\small - за рамками данного доклада}
+        
+        \pause
+        \item Память
+        
+        \pause
+        \item CPU
     \end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Причины}
+    \begin{itemize}
+        \pause
+        \item Недоиспользование железа
 
+        \pause
+        \item Трудности масштабирования
+    \end{itemize}
+
+    \pause
+    \begin{block}
+        {\huge Архитектурные проблемы}
+    \end{block}
 \end{frame}
 
-\begin{frame}{Тест}
+\section{Недиспользование железа}
+\begin{frame}{Недоиспользование железа}
+    Рассмотрим типичный вебсервер.
+    \pause на PHP\pause, Perl\pause, Ruby\pause...
+
     \begin{columns}
         \column{.5\textwidth}
-        \begin{block}{Answered Questions}
-            How many primes are there?
+        \begin{block}{Задачи одного цикла}
+            \begin{itemize}
+                \pause
+                \item Чтение запроса из сети.
+
+                \pause
+                \item Парсер запроса http.
+
+                \pause
+                \item Валидация запроса, выбор контроллера.
+
+                \pause
+                \item Запросы к хранилищу данных.
+
+                \pause
+                \item Формирование ответа (template)
+
+                \pause
+                \item Отправка ответа клиенту.
+            \end{itemize}
         \end{block}
 
+        \pause
         \column{.5\textwidth}
-        \begin{block}{Open Questions}
-            Is every even number the sum of two primes?
+        \begin{block}{Традиционная реализация}
+            \begin{itemize}
+                \pause
+                \item один процесс на один цикл
+                
+                \pause
+                \item один тред на один цикл
+            \end{itemize}
+
         \end{block}
     \end{columns}
 \end{frame}
 
-%     \begin{center}
-%         \centerline{\huge Высокая нагрузка это сколько?}
-%     \end{center}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Начались разговоры о HighLoad?}
+        \begin{itemize}
+            \pause
+            \item Увеличение числа процессов/тредов.
+            
+            \pause
+            \item Увеличение числа серверов.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Вернемся к рассматриваемому серверу}
+        \begin{itemize}
+            \pause
+            \item Проблемы наступили при ~100 запросах в секунду.
+            
+            \pause
+            \item Увеличили число процессов в работе.
+
+            \pause
+            \item Новые проблемы при ~150 запросов в секунду.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{block}{Что делать?}
+            \begin{itemize}
+                \pause\item Менять архитектуру?
+                    \pause\par - Мы над этим 3 года работали!
+
+                \pause\item Добавлять второй сервер?
+                    \pause\par - Это тоже не просто! (бизнеслогика)
+            \end{itemize}
+        \end{block}
+
+        \column{.5\textwidth}
+        \begin{block}{Спокойно!}
+            \begin{itemize}
+                \pause\item Провести анализ архитектуры
+                \pause\item Провести измерения
+            \end{itemize}
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Измерения: ищем узкое место?}
+        \begin{tabular}{ c c }
+
+            \pause Чтение запроса из сети. & 15К RPS  \\
+            \pause Парсинг запроса, валидация, выбор контроллера. & 150К RPS/CPU  \\
+            \pause Запросы к хранилищу. & 60К RPS \\
+            \pause Формирование ответа (Соединение данных с template) & 100К RPS/CPU \\
+            \pause Отправка ответа клиенту. & 15К RPS \\
+
+        \end{tabular}
+    \end{block}
+\end{frame}
+    
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Итого}
+        {\huge
+            $\frac{1}{\frac{1}{15 * 10^3} + \frac{1}{150 * 10^3} + \frac{1}{60 * 10^3}+\frac{1}{100 * 10^3}+\frac{1}{15 * 10^3}} = 6000 RPS$
+        }
+    \end{block}
+
+    \pause
+    \begin{block}{Но, позвольте!}
+        \begin{itemize}
+            \pause\item У нас проблемы на 150 RPS!
+            \pause\item Тут что-то не так!
+        \end{itemize}
+    \end{block}
+\end{frame}
 
 
-% \section{Архитектура программы}
-% \subsection{Overview of the Beamer Class}
-% \subsection{Overview of Similar Classes}
-% \begin{frame}{Тест}
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Начинаем разбираться}
+        \begin{itemize}
+            \pause\item Хранилище выходит на свои RPS при достаточно большом
+                числе соединений к нему.
+            \pause\item То же самое и с взаимодействием с клиентом.
+            \pause\item Хранилище локально выдает еще больше RPS причем и на
+                одном соединении!
+        \end{itemize}
+    \end{block}
 
-% тут фигня
-% \end{frame}
+    \pause
+    \begin{block}{Что делать?}
+        \begin{itemize}
+            \pause\item Попробуем еще увеличить число процессов?
+            \pause\item Проблемы стали больше!
+            \pause\item Почему?!
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Резюме ситуации, еще раз}
+        \begin{itemize}
+            \pause\item Имеется 100500 строк кода,
+                над которым работали несколько лет.
+
+            \pause\item Этот код AS IS по результатам измерений
+                может выдавать гораздо больше RPS чем в реальности.
+
+            \pause\item Проблемы начинаются на уровне RPS на порядок меньшими
+                нежели расчетные.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Еще раз рассмотрим цикл обработки}
+        \begin{itemize}
+            \pause\item Ожидание запроса от пользователя.
+            \pause\item Парсинг запроса, валидация.
+            \pause\item Формирование запроса (запросов) в БД.
+            \pause\item Ожидание ответа (ответов) из БД.
+            \pause\item Соединение данных из БД с шаблоном.
+            \pause\item Ожидание отправки данных клиенту.
+        \end{itemize}
+        
+        \begin{itemize}
+            \pause\item Следующий клиент!
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Измеряем}
+        \begin{tabular}{ c c }
+            \pause Ожидание запроса от пользователя. & 70 мкс \\
+            \pause Парсинг запроса, валидация.  & 6 мкс \\
+            \pause Формирование запроса (запросов) в БД. & 1 мкс \\
+            \pause Ожидание ответа (ответов) из БД. & 16 мкс \\
+            \pause Соединение данных из БД с шаблоном. & 10 мкс\\
+            \pause Ожидание отправки данных клиенту. & 70 мкс \\
+        \end{tabular}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Итого}
+        \begin{itemize}
+            \item Код выполнялся: $6 + 1 + 10 = \pause17$ мкс
+            \pause\item Чего-либо ожидали: $70 + 16 + 70 = \pause156$ мкс
+            \pause\item {\large Наш код выполняется только 10\% времени!}
+            \pause\item И при этом тормозит!
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Недоиспользование железа}
+\begin{verbatim}
+#include <unistd.h>
+
+int main(int argc, char **argv) {
+        int i;
+        for (;;) {
+                usleep(70);     usleep(7);
+                usleep(16);     usleep(10);
+                usleep(70); 
+        }       
+}
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}{Итого}
+        \begin{itemize}
+            \pause\item Код, делающий только sleep в цикле неплохо грузит CPU
+                \pause\par - по моим измерениям - где-то 15\% загрузки на CPU
+            \pause\item Запустив десяток таких ``воркеров'', получаем
+                примерно такую же нагрузку как на проблемном сервере.
+            \pause\item Понятно что пример синтетический
+                (есть вопросы к реализации usleep).
+        \end{itemize}
+    \end{block}
+
+    \pause
+    \begin{block}{Вернемся к нашему серверу}
+        \begin{itemize}
+            \pause\item Каждая отдельная часть имеет хорошую производительность
+                \pause\par достаточную для развития
+                            проекта еще на несколько лет вперед.
+            \pause\item Большую часть времени (90\%) наш код проводит
+                        в ожидании.
+
+            \pause\item Что делать?
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Недоиспользование железа}
+    \begin{block}
+        {\huge Просто реорганизовать код}
+    \end{block}
+\end{frame}
+
+
+\section{Событийные системы}
+
+\begin{frame}{Событийно-ориентированное программирование}
+
+    \begin{quote}
+    Компьютер — это конечный автомат.
+        Треды для тех людей, которые не умеют
+        программировать конечные автоматы.
+    \end{quote}
+    \begin{center}
+        \begin{uncoverenv}
+        Алан Кокс
+        \end{uncoverenv}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{Событийно-ориентированное программирование}
+    \begin{block}
+        {\huge Избавимся от тредов!}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Событийно-ориентированное программирование}
+    \begin{block}{Машина событий}
+        \begin{itemize}
+
+            \pause\item Вся работа делается в обработчике события.
+                \pause\par - в общем случае - callback.
+
+            \pause\item Когда программе нечего делать (например
+                она ждет события), то управление возвращается
+                машине событий.
+                    \pause\par в общем случае - return из callback.
+
+            \pause\item Событие может создавать другие события.
+
+        \end{itemize}
+
+    \end{block}
+\end{frame}
+
+\begin{frame}{Событийно-ориентированное программирование}
+
+\end{frame}
+\begin{frame}{Событийно-ориентированное программирование}
+
+\end{frame}
+\begin{frame}{Событийно-ориентированное программирование}
+
+\end{frame}
+\begin{frame}{Событийно-ориентированное программирование}
+
+\end{frame}
+\begin{frame}{Событийно-ориентированное программирование}
+
+\end{frame}
 
 \end {document}
