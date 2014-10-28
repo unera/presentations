@@ -11,11 +11,6 @@
 \begin{document}
 \maketitle
 
-\begin{frame}
-    \tableofcontents
-\end{frame}
-
-\section{Введение}
 \begin{frame}{HighLoad, что это?}
     \begin{itemize}
 
@@ -82,16 +77,17 @@
         \item Трудности масштабирования
     \end{itemize}
 
-    \pause
+\end{frame}
+
+\begin{frame}{Причины}
     \begin{block}
         {\huge Архитектурные проблемы}
     \end{block}
 \end{frame}
 
-\section{Недиспользование железа}
 \begin{frame}{Недоиспользование железа}
     Рассмотрим типичный вебсервер.
-    \pause на PHP\pause, Perl\pause, Ruby\pause...
+    \pause на Perl\pause, Python\pause, Ruby\pause...
 
     \begin{columns}
         \column{.5\textwidth}
@@ -101,16 +97,16 @@
                 \item Чтение запроса из сети.
 
                 \pause
-                \item Парсер запроса http.
+                \item Парсинг запроса http.
 
                 \pause
                 \item Валидация запроса, выбор контроллера.
 
                 \pause
-                \item Запросы к хранилищу данных.
+                \item Запрос(ы) к хранилищу данных.
 
                 \pause
-                \item Формирование ответа (template)
+                \item Формирование ответа (template).
 
                 \pause
                 \item Отправка ответа клиенту.
@@ -148,14 +144,14 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Вернемся к рассматриваемому серверу}
         \begin{itemize}
-            \pause
-            \item Проблемы наступили при ~100 запросах в секунду.
+            \pause\item Проблемы наступили при $\approx$100 запросах в секунду.
             
-            \pause
-            \item Увеличили число процессов в работе.
+            \pause\item Увеличили число процессов в работе.
+                \pause\par Помогло.
 
-            \pause
-            \item Новые проблемы при ~150 запросов в секунду.
+            \pause\item Новые проблемы при $\approx$150 запросов в секунду.
+            
+            \pause\item Дальнейшее увеличение числа процессов помогает слабо.
         \end{itemize}
     \end{block}
 \end{frame}
@@ -177,15 +173,16 @@
         \column{.5\textwidth}
         \begin{block}{Спокойно!}
             \begin{itemize}
-                \pause\item Провести анализ архитектуры
-                \pause\item Провести измерения
+                \pause\item Провести анализ архитектуры.
+                \pause\item Провести измерения.
+                \pause\item Найти слабые места.
             \end{itemize}
         \end{block}
     \end{columns}
 \end{frame}
 
 \begin{frame}{Недоиспользование железа}
-    \begin{block}{Измерения: ищем узкое место?}
+    \begin{block}{Измерения}
         \begin{tabular}{ c c }
 
             \pause Чтение запроса из сети. & 15К RPS  \\
@@ -221,9 +218,9 @@
         \begin{itemize}
             \pause\item Хранилище выходит на свои RPS при достаточно большом
                 числе соединений к нему.
+            \pause\item Либо хранилище надо располагать локально.
+                \pause\par {\small неприемлемо.}
             \pause\item То же самое и с взаимодействием с клиентом.
-            \pause\item Хранилище локально выдает еще больше RPS причем и на
-                одном соединении!
         \end{itemize}
     \end{block}
 
@@ -246,7 +243,7 @@
             \pause\item Этот код AS IS по результатам измерений
                 может выдавать гораздо больше RPS чем в реальности.
 
-            \pause\item Проблемы начинаются на уровне RPS на порядок меньшими
+            \pause\item Проблемы начинаются на уровне RPS на порядок меньших,
                 нежели расчетные.
         \end{itemize}
     \end{block}
@@ -256,7 +253,7 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Еще раз рассмотрим цикл обработки}
         \begin{itemize}
-            \pause\item Ожидание запроса от пользователя.
+            \pause\item Ожидание запроса (данных) от пользователя.
             \pause\item Парсинг запроса, валидация.
             \pause\item Формирование запроса (запросов) в БД.
             \pause\item Ожидание ответа (ответов) из БД.
@@ -273,7 +270,7 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Измеряем}
         \begin{tabular}{ c c }
-            \pause Ожидание запроса от пользователя. & 70 мкс \\
+            \pause Ожидание запроса (данных) от пользователя. & 70 мкс \\
             \pause Парсинг запроса, валидация.  & 6 мкс \\
             \pause Формирование запроса (запросов) в БД. & 1 мкс \\
             \pause Ожидание ответа (ответов) из БД. & 16 мкс \\
@@ -288,7 +285,7 @@
         \begin{itemize}
             \item Код выполнялся: $6 + 1 + 10 = \pause17$ мкс
             \pause\item Чего-либо ожидали: $70 + 16 + 70 = \pause156$ мкс
-            \pause\item {\large Наш код выполняется только 10\% времени!}
+            \pause\item {\large Код выполняется только 10\% времени!}
             \pause\item И при этом тормозит!
         \end{itemize}
     \end{block}
@@ -342,8 +339,6 @@ int main(int argc, char **argv) {
 \end{frame}
 
 
-\section{Событийные системы}
-
 \begin{frame}{Событийно-ориентированное программирование}
 
     \begin{quote}
@@ -362,6 +357,7 @@ int main(int argc, char **argv) {
 \begin{frame}{Событийно-ориентированное программирование}
     \begin{block}
         {\huge Избавимся от тредов!}
+        \pause\par - {\small и процессов.}
     \end{block}
 \end{frame}
 
@@ -377,7 +373,8 @@ int main(int argc, char **argv) {
                 машине событий.
                     \pause\par в общем случае - return из callback.
 
-            \pause\item Событие может создавать другие события.
+            \pause\item Обработчик события может генерировать другие события и
+                устанавливать другие обработчики.
         \end{itemize}
     \end{block}
 \end{frame}
@@ -447,8 +444,8 @@ int main(int argc, char **argv) {
             \pause\item Простое управление
                 \pause\par Три основных метода
                 \begin{itemize}
-                    \pause\item Создать процесс (create)
-                    \pause\item Передать управление планировщику (yieild, cede)
+                    \pause\item Создать процесс (create, async)
+                    \pause\item Передать управление планировщику (yield, cede)
                     \pause\item Разбудить выбранный процесс (wakeup, ready)
                 \end{itemize}
         \end{itemize}
@@ -461,7 +458,7 @@ int main(int argc, char **argv) {
         \begin{itemize}
             \pause\item Регистрация события в машине событий
             \pause\item Передача управления планировщику
-            \pause\item Событие будит текущий процесс
+            \pause\item Событие будит текущий процесс (файбер)
             \pause\item Программа продолжает работу с данными от события
         \end{itemize}
     \end{block}
@@ -489,9 +486,57 @@ int main(int argc, char **argv) {
 \end{frame}
 
 \begin{frame}{Библиотеки и языки}
-    Тут примеры будут типа язык - либа
+    \begin{itemize}
+        \pause\item Perl
+            \pause\par Coro + AnyEvent
+        \pause\item Python
+            \pause\par fibers + twisted
+        \pause\item PHP5
+            \pause\par появился оператор yield, fiber
+    \end{itemize}
+\end{frame}
 
-    + тарантул будет
+\begin{frame}{Что дальше?}
+    \begin{itemize}
+        \pause\item Используем fiber'ы/event-машины
+            в том языке к которому привыкли
+        \pause\item Рассматриваем существующие варианты
+            \begin{itemize}
+                \item\pause Node.JS
+                    \pause\par - отказались от парадигмы fibers
+                \item\pause Tarantool...
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Tarantool}
+    \begin{itemize}
+        \pause\item Полноценный app-сервер
+        \pause\item БД на борту
+            \pause\par - in-memory
+            \pause\par - disk
+        \pause\item Сокеты, диск, http-сервер, очереди
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Недостатки}
+    \begin{itemize}
+        \pause\item Для больших проектов одного CPU все-таки маловато
+        \pause\item Реализации fiber'ов для традиционных
+            ЯП плохо масштабируются по CPU/хостам.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Перспектива}
+    \begin{itemize}
+        \pause\item Erlang
+            \pause\par - хорошее масштабирование по CPU и хостам
+            \pause\par - очень качественное решение
+            \pause\par - высокий порог вхождения
+        \pause\item Go
+            \pause\par - более низкий порог вхождения
+    \end{itemize}
 \end{frame}
 
 \end {document}
