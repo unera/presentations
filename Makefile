@@ -1,4 +1,4 @@
-all: highload.pdf db.pdf
+all: highload.pdf
 
 
 %.pdf: %.tex

@@ -562,7 +562,27 @@ int main(int argc, char **argv) {
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Недостатки}
+\begin{frame}
+    На данной парадигме реализован крупнейший бакенд
+    Яндекс.Такси - НАУТАКСИ.
+    \begin{itemize}
+        \item 20.000+ водителей непрерывно шлют свое местоположение
+        \item > 1 млн заявок на заказы в мес
+        \par\pause
+    \end{itemize}
+    Проект включает в себя:
+    \begin{itemize}
+        \item Вебсервер на Coro+AnyEvent
+        \item Большую коллекцию очередей на Tarantool
+        \item Систему доставки сообщений на Tarantool
+        \item Хранилище данных на PostgreSQL
+    \end{itemize}
+
+    Скачайте приложение НАУТАКСИ в андроид маркете или
+    AppleStore.
+\end{frame}
+
+\begin{frame}{Недостатки подхода}
     \begin{itemize}
         \item Для больших проектов одного CPU все-таки маловато
         \item Реализации fiber'ов для традиционных
