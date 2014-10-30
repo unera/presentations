@@ -32,19 +32,19 @@
     \begin{itemize}
 
         \item Конференция?
-        
+
         \pause
         \item Высокая нагрузка?
 
         \pause
         \item Миф?!
-    
+
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Высокая нагрузка что это?}
     \begin{itemize}
-        
+
         \pause
         \item $53.328 * 10^9$  запросов в секунду?
             \pause
@@ -56,7 +56,7 @@
         \pause
         \item 1 запрос в секунду?
             \pause
-            - любой веб сервер?...
+            - любой веб сервер справится?...
             \pause
             \par {\small перекодирующий видеоролики? :)}
     \end{itemize}
@@ -70,72 +70,50 @@
 \end{frame}
 
 \begin{frame}{Когда это бывает?}
-    \pause
-    {\large Достигнуты технические ограничения}
-    \begin{itemize}
-        \pause
-        \item Сеть
-            \pause {\small - за рамками данного доклада}
-        
-        \pause\item Память
-        \pause\item CPU
-        \pause\item Хранилище данных
-    \end{itemize}
+    \begin{block}{Достигнуты технические ограничения}
+        \begin{itemize}
+            \item Сеть
+            \item Память
+            \item CPU
+            \item Хранилище
+        \end{itemize}
+    \end{block}
+    \begin{block}{Дополнительно}
+        \begin{itemize}
+            \item Недоиспользование железа
+            \item Трудности масштабирования
+        \end{itemize}
+    \end{block}
 \end{frame}
 
-\begin{frame}{Причины}
-    \begin{itemize}
-        \pause
-        \item Недоиспользование железа
-
-        \pause
-        \item Трудности масштабирования
-    \end{itemize}
-
-\end{frame}
-
-\begin{frame}{Причины}
+\begin{frame}{Причина}
     \begin{block}
         {\huge Архитектурные проблемы}
     \end{block}
 \end{frame}
 
 \begin{frame}{Недоиспользование железа}
-    Рассмотрим типичный вебсервер.
-    \pause на Perl\pause, Python\pause, Ruby\pause...
+    Рассмотрим типичный вебсервер на Perl, Python, Ruby...
+    \pause
 
     \begin{columns}
         \column{.5\textwidth}
         \begin{block}{Задачи одного цикла}
             \begin{itemize}
-                \pause
                 \item Чтение запроса из сети.
-
-                \pause
                 \item Парсинг запроса http.
-
-                \pause
                 \item Валидация запроса, выбор контроллера.
-
-                \pause
                 \item Запрос(ы) к хранилищу данных.
-
-                \pause
                 \item Формирование ответа (template).
-
-                \pause
                 \item Отправка ответа клиенту.
             \end{itemize}
         \end{block}
 
         \pause
         \column{.5\textwidth}
-        \begin{block}{Традиционная реализация}
+        \begin{block}{Традиционная реализация (apache)}
             \begin{itemize}
-                \pause
                 \item один процесс на один цикл
-                
-                \pause
                 \item один тред на один цикл
             \end{itemize}
 
@@ -147,10 +125,7 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Начались разговоры о HighLoad?}
         \begin{itemize}
-            \pause
             \item Увеличение числа процессов/тредов.
-            
-            \pause
             \item Увеличение числа серверов.
         \end{itemize}
     \end{block}
@@ -159,25 +134,24 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Вернемся к рассматриваемому серверу}
         \begin{itemize}
-            \pause\item Проблемы наступили при $\approx$100 запросах в секунду.
-            
-            \pause\item Увеличили число процессов в работе.
-                \pause\par Помогло.
+            \item Проблемы наступили при $\approx$100 запросах в секунду.
 
-            \pause\item Новые проблемы при $\approx$150 запросов в секунду.
-            
-            \pause\item Дальнейшее увеличение числа процессов помогает слабо.
+            \item Увеличили число процессов в работе.
+                \par - Помогло.
+
+            \item Новые проблемы при $\approx$150 запросов в секунду.
+
+            \item Дальнейшее увеличение числа процессов помогает слабо.
         \end{itemize}
     \end{block}
 \end{frame}
 
 \begin{frame}{Недоиспользование железа}
-
     \begin{columns}
         \column{.5\textwidth}
         \begin{block}{Что делать?}
             \begin{itemize}
-                \pause\item Менять архитектуру?
+                \pause\item Переписывать?
                     \pause\par - Мы над этим 3 года работали!
 
                 \pause\item Добавлять второй сервер?
@@ -188,9 +162,9 @@
         \column{.5\textwidth}
         \begin{block}{Спокойно!}
             \begin{itemize}
-                \pause\item Провести анализ архитектуры.
-                \pause\item Провести измерения.
-                \pause\item Найти слабые места.
+                \item Провести измерения.
+                \item Провести анализ архитектуры.
+                \item Найти слабые места.
             \end{itemize}
         \end{block}
     \end{columns}
@@ -199,30 +173,33 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Измерения}
         \begin{tabular}{ c c }
-
-            \pause Чтение запроса из сети. & 15К RPS  \\
-            \pause Парсинг запроса, валидация, выбор контроллера. & 150К RPS/CPU  \\
-            \pause Запросы к хранилищу. & 60К RPS \\
-            \pause Формирование ответа (Соединение данных с template) & 100К RPS/CPU \\
-            \pause Отправка ответа клиенту. & 15К RPS \\
-
+            Чтение запроса из сети. & 15К RPS  \\
+            Парсинг запроса, контроллер. & 150К RPS/CPU  \\
+            Запросы к хранилищу. & 60К RPS \\
+            Формирование ответа & 100К RPS/CPU \\
+            Отправка ответа клиенту. & 15К RPS \\
         \end{tabular}
     \end{block}
 \end{frame}
-    
+
 
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Итого}
         {\huge
-            $\frac{1}{\frac{1}{15 \ 10^3} + \frac{1}{150 \ 10^3} + \frac{1}{60 \ 10^3}+\frac{1}{100 \ 10^3}+\frac{1}{15 \ 10^3}} = 6000 RPS$
+            $\frac{1}{                                      %
+                \frac{1}{15 \cdot 10^3} +                   %
+                \frac{1}{150 \cdot 10^3} +                  %
+                \frac{1}{60 \cdot 10^3} +                   %
+                \frac{1}{100 \cdot 10^3} +                  %
+                \frac{1}{15 \cdot 10^3}} = 6000 RPS$
         }
     \end{block}
 
     \pause
     \begin{block}{Но, позвольте!}
         \begin{itemize}
-            \pause\item У нас проблемы на 150 RPS!
-            \pause\item Тут что-то не так!
+            \item У нас проблемы на 150 RPS!
+            \item Тут что-то не так!
         \end{itemize}
     \end{block}
 \end{frame}
@@ -231,20 +208,11 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Начинаем разбираться}
         \begin{itemize}
-            \pause\item Хранилище выходит на свои RPS при достаточно большом
+            \item Хранилище выходит на свои RPS при достаточно большом
                 числе соединений к нему.
-            \pause\item Либо хранилище надо располагать локально.
-                \pause\par {\small неприемлемо.}
-            \pause\item То же самое и с взаимодействием с клиентом.
-        \end{itemize}
-    \end{block}
-
-    \pause
-    \begin{block}{Что делать?}
-        \begin{itemize}
-            \pause\item Попробуем еще увеличить число процессов?
-            \pause\item Проблемы стали больше!
-            \pause\item Почему?!
+            \item Либо хранилище надо располагать локально.
+                \par {\small неприемлемо.}
+            \item То же самое и с взаимодействием с клиентом.
         \end{itemize}
     \end{block}
 \end{frame}
@@ -252,13 +220,13 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Резюме ситуации, еще раз}
         \begin{itemize}
-            \pause\item Имеется 100500 строк кода,
+            \item Имеется 100500 строк кода,
                 над которым работали несколько лет.
 
-            \pause\item Этот код AS IS по результатам измерений
+            \item Этот код AS IS по результатам измерений
                 может выдавать гораздо больше RPS чем в реальности.
 
-            \pause\item Проблемы начинаются на уровне RPS на порядок меньших,
+            \item Проблемы начинаются на уровне RPS на порядок меньших,
                 нежели расчетные.
         \end{itemize}
     \end{block}
@@ -266,31 +234,44 @@
 
 
 \begin{frame}{Недоиспользование железа}
-    \begin{block}{Еще раз рассмотрим цикл обработки}
-        \begin{itemize}
-            \pause\item Ожидание запроса (данных) от пользователя.
-            \pause\item Парсинг запроса, валидация.
-            \pause\item Формирование запроса (запросов) в БД.
-            \pause\item Ожидание ответа (ответов) из БД.
-            \pause\item Соединение данных из БД с шаблоном.
-            \pause\item Ожидание отправки данных клиенту.
-        \end{itemize}
-        
-        \begin{itemize}
-            \pause\item Следующий клиент!
-        \end{itemize}
-    \end{block}
+    \begin{columns}
+        \column{.5\textwidth}
+            \begin{block}{Работа сервера}
+                \begin{itemize}
+                    \item Запросу выделяется CPU.
+                    \item Ожидаются данные запроса.
+                    \item Диспетчеризация.
+                    \item Запросы в БД.
+                    \item Ожидаются ответы из БД.
+                    \item Формируется ответ.
+                    \item Ответ отправляется клиенту.
+                \end{itemize}
+            \end{block}
+        \pause
+        \column{.5\textwidth}
+            \begin{block}{Магазин обуви}
+                \begin{itemize}
+                    \item Клиенту выделяется менеджер.
+                    \item Сопровождает клиента.
+                    \item Может сходить на склад за нужным размером.
+                    \item Ожидает товара со склада/решения клиента.
+                    \item Пробивает чек на кассе.
+                    \item Прощается с клиентом.
+                \end{itemize}
+            \end{block}
+    \end{columns}
 \end{frame}
+
 
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Измеряем}
         \begin{tabular}{ c c }
-            \pause Ожидание запроса (данных) от пользователя. & 70 мкс \\
-            \pause Парсинг запроса, валидация.  & 6 мкс \\
-            \pause Формирование запроса (запросов) в БД. & 1 мкс \\
-            \pause Ожидание ответа (ответов) из БД. & 16 мкс \\
-            \pause Соединение данных из БД с шаблоном. & 10 мкс\\
-            \pause Ожидание отправки данных клиенту. & 70 мкс \\
+            Ожидание запроса (данных) от пользователя. & 70 мкс \\
+            Парсинг запроса, валидация.  & 6 мкс \\
+            Формирование запроса (запросов) в БД. & 1 мкс \\
+            Ожидание ответа (ответов) из БД. & 16 мкс \\
+            Соединение данных из БД с шаблоном. & 10 мкс\\
+            Ожидание отправки данных клиенту. & 70 мкс \\
         \end{tabular}
     \end{block}
 \end{frame}
@@ -298,10 +279,10 @@
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Итого}
         \begin{itemize}
-            \item Код выполнялся: $6 + 1 + 10 = \pause17$ мкс
-            \pause\item Чего-либо ожидали: $70 + 16 + 70 = \pause156$ мкс
+            \item Код выполнялся: $6 + 1 + 10 = 17$ мкс
+            \item Чего-либо ожидали: $70 + 16 + 70 = 156$ мкс
             \pause\item {\large Код выполняется только 10\% времени!}
-            \pause\item И при этом тормозит!
+            \item И при этом тормозит!
         \end{itemize}
     \end{block}
 \end{frame}
@@ -314,9 +295,9 @@ int main(int argc, char **argv) {
         int i;
         for (;;) {
                 usleep(70);     usleep(7);
-                usleep(16);     usleep(10);
-                usleep(70); 
-        }       
+                usleep(17);     usleep(10);
+                usleep(70);
+        }
 }
 \end{verbatim}
 \end{frame}
@@ -324,11 +305,11 @@ int main(int argc, char **argv) {
 \begin{frame}{Недоиспользование железа}
     \begin{block}{Итого}
         \begin{itemize}
-            \pause\item Код, делающий только sleep в цикле неплохо грузит CPU
-                \pause\par - по моим измерениям - где-то 15\% загрузки на CPU
-            \pause\item Запустив десяток таких ``воркеров'', получаем
+            \item Код, делающий только sleep в цикле неплохо грузит CPU
+                \par - по моим измерениям - где-то 15\% загрузки на CPU
+            \item Запустив десяток таких ``воркеров'', получаем
                 примерно такую же нагрузку как на проблемном сервере.
-            \pause\item Понятно что пример синтетический
+            \item Понятно что пример синтетический
                 (есть вопросы к реализации usleep).
         \end{itemize}
     \end{block}
@@ -336,13 +317,13 @@ int main(int argc, char **argv) {
     \pause
     \begin{block}{Вернемся к нашему серверу}
         \begin{itemize}
-            \pause\item Каждая отдельная часть имеет хорошую производительность
-                \pause\par достаточную для развития
+            \item Каждая отдельная часть имеет хорошую производительность
+                \par достаточную для развития
                             проекта еще на несколько лет вперед.
-            \pause\item Большую часть времени (90\%) наш код проводит
+            \item Большую часть времени (90\%) наш код проводит
                         в ожидании.
 
-            \pause\item Что делать?
+            \item Что делать?
         \end{itemize}
     \end{block}
 \end{frame}
@@ -350,6 +331,9 @@ int main(int argc, char **argv) {
 \begin{frame}{Недоиспользование железа}
     \begin{block}
         {\huge Просто реорганизовать код}
+            \begin{center}
+                \pause\includegraphics[scale=0.35]{img/nelzya.png}
+            \end{center}
     \end{block}
 \end{frame}
 
@@ -372,50 +356,65 @@ int main(int argc, char **argv) {
 \begin{frame}{Событийно-ориентированное программирование}
     \begin{block}
         {\huge Избавимся от тредов!}
-        \pause\par - {\small и процессов.}
+            \par - {\small и процессов.}
     \end{block}
+\end{frame}
+
+
+\begin{frame}{От магазина обуви к продуктовому!}
+    \begin{block}{Особенности продуктового магазина}
+        \begin{itemize}
+            \item Клиенты собираются в очереди.
+            \item Продавец обслуживает клиентов по очереди и без простоя.
+            \item Простой продавца возможен только при отсутствии клиентов.
+            \item Один продавец может обслужить в десятки раз больше клиентов.
+            \item PROFIT?
+        \end{itemize}
+    \end{block}
+
 \end{frame}
 
 \begin{frame}{Событийно-ориентированное программирование}
     \begin{block}{Машина событий}
         \begin{itemize}
 
-            \pause\item Вся работа делается в обработчике события.
-                \pause\par - в общем случае - callback.
+            \item Исполнитель заявляет о готовности выполнить задачу.
+                \par - подписывается на событие: ``Свободная касса!''
 
-            \pause\item Когда программе нечего делать (например
-                она ждет события), то управление возвращается
-                машине событий.
-                    \pause\par в общем случае - return из callback.
+            \item При появлении задачи исполнитель начинает
+                ее выполнение немедленно.
 
-            \pause\item Обработчик события может генерировать другие события и
-                устанавливать другие обработчики.
+            \item Если задача требует ожидания - ставит ожидающего
+                в очередь и переходит к выполнению другой задачи.
+
         \end{itemize}
+    \end{block}
+
+    \pause
+    \begin{block}{Типичная реализация}
+        \begin{itemize}
+            \item Подписка на задачу - регистрация callback.
+            \item Выполнение задачи - вызов callback.
+            \item Ожидание - return из callback.
+        \end{itemize}
+
     \end{block}
 \end{frame}
 
 \begin{frame}{Событийно-ориентированное программирование}
     \begin{block}{Перестроим наш сервер}
         \begin{itemize}
-            \pause\item Ожидание запроса от пользователя.
-                \pause\par - заменится обработчиком события
+            \item Ожидание запроса от пользователя.
+                \par - заменится регистрацией callback
                     "пришел запрос от пользователя"
-
-            \pause\item Парсинг запроса, валидация.
-                \pause\par - не изменится
-
-            \pause\item Формирование запроса (запросов) в БД.
-                \pause\par - не изменится
-
-            \pause\item Ожидание ответа (ответов) из БД.
-                \pause\par - заменится обработчиком события
+            \item Диспетчерезация запроса - не изменится
+            \item Формирование запросов в БД - не изменится
+            \item Ожидание ответа из БД.
+                \par - заменится регистрацией callback
                         "пришел ответ из БД"
-
-            \pause\item Соединение данных из БД с шаблоном.
-                \pause\par - не изменится
-
-            \pause\item Ожидание отправки данных клиенту.
-                \pause\par - заменится обработчиком события
+            \item Формирование ответа - не изменится
+            \item Ожидание отправки данных клиенту.
+                \par - заменится регистрацией callback
                         "данные пользователю отправлены"
         \end{itemize}
     \end{block}
@@ -423,58 +422,86 @@ int main(int argc, char **argv) {
 
 
 \begin{frame}{Событийно-ориентированное программирование}
-    \begin{block}{Итого}
+    \begin{block}{Переписываем одну страничку и изменяем}
         \begin{itemize}
-            \pause\item Производительность одного сервера выросла в ~10 раз
-            \pause\item Одного CPU/коннекта к БД достаточно для еще нескольких
+            \item Производительность одного сервера выросла в >10 раз
+            \item Одного CPU/коннекта к БД достаточно для еще нескольких
                 лет роста нагрузки.
 
-            \pause\item Но слишком много переделок!
+            \item Но слишком много переделок!
+        \end{itemize}
+    \end{block}
+
+    \pause
+    \begin{block}{Проблемы}
+        \begin{itemize}
+            \item Сохранение контекста между callback
+            \item Ветвления
+            \item Обработка исключительных ситуаций
         \end{itemize}
     \end{block}
 \end{frame}
+
 
 \begin{frame}{Событийно-ориентированное программирование}
     \begin{block}{Что затронуто изменениями}
         \begin{itemize}
-            \pause\item Интерфейс с вебсервером (получение параметров запроса итп)
-                \pause\par - некритично.
-                    В крайнем случае обходится написанием "врапперов".
-                    В большинстве случаев вообще незаметно.
-            \pause\item Интерфейс с БД.
-                \pause\par - критично. 
-                    Много кода бизнеслогики поехало в callbacks. Сложную логику
-                    практически невозможно реализовать.
-                    Требуется переписывание ~90\% проекта.
+            \item Интерфейс с вебсервером - некритично.
+            \item Интерфейс с БД.
+                \par - критично.
+                Много кода бизнеслогики поехало в callbacks. Сложную логику
+                практически невозможно реализовать.
+                Требуется переписывание ~90\% проекта.
+            \item Интерфейс с сетью (если он есть)
+                \par - так же переехал в callbacks.
         \end{itemize}
     \end{block}
 \end{frame}
 
 \begin{frame}{Событийно-ориентированное программирование}
-    \begin{block}{Планировщик}
-        Поскольку планировщик OS - очень тяжелый, необходим планировщик userspace.
+    \begin{block}{Плюсы Обувного магазина}
         \begin{itemize}
-            \pause\item Невытесняющая многозадачность
-            \pause\item Простое порождение ``процессов''
-            \pause\item Простое управление
-                \pause\par Три основных метода
+            \item Контекст задачи можно хранить на текущем стеке
+                (свалить на менеджера).
+            \item Процесс можно прервать в любой момент.
+            \item Произвольное ветвление (можно ходить по разным
+                отделам в произвольном порядке).
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Плюсы продуктового магазина}
+        \begin{itemize}
+            \item Менеджеры не простаивают
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Событийно-ориентированное программирование}
+    \begin{block}{Соединим плюсы обоих подходов}
+        Пишем свой планировщик (fibers).
+        \begin{itemize}
+            \item Невытесняющая многозадачность
+            \item Простое порождение ``процессов''
+            \item Простое API
+                \par Три основных метода
                 \begin{itemize}
-                    \pause\item Создать процесс (create, async)
-                    \pause\item Передать управление планировщику (yield, cede)
-                    \pause\item Разбудить выбранный процесс (wakeup, ready)
+                    \item Создать процесс (create, async)
+                    \item Передать управление планировщику (yield, cede)
+                    \item Разбудить выбранный процесс (wakeup, ready)
                 \end{itemize}
         \end{itemize}
     \end{block}
 \end{frame}
 
 \begin{frame}{Событийно-ориентированное программирование}
-    \begin{block}{Интегрируем с машиной событий}
+    \begin{block}{Интеграция планировщика с машиной событий}
         Структура кода теперь выглядит так:
         \begin{itemize}
-            \pause\item Регистрация события в машине событий
-            \pause\item Передача управления планировщику
-            \pause\item Событие будит текущий процесс (файбер)
-            \pause\item Программа продолжает работу с данными от события
+            \item Подписка на событие (регистрация callback).
+            \item Передача управления планировщику (yield, cede).
+            \item Событие будит (wakeup) текущий процесс.
+            \item Процесс обрабатывает события используя данные переданные
+                в callback.
         \end{itemize}
     \end{block}
     \pause
@@ -483,19 +510,17 @@ int main(int argc, char **argv) {
     \end{block}
 \end{frame}
 
-\begin{frame}{Событийно-ориентированное программирование} 
+\begin{frame}{Событийно-ориентированное программирование}
     \begin{block}{Вернемся к нашему серверу}
         \begin{itemize}
-            \pause\item Добавляем машину событий
-            \pause\item Добавляем библиотеку fibers
-            \pause\item Переписываем интерфейс с вебсервером
-                \pause\par - некритично, решается враппером.
-            \pause\item Переписываем интерфейс с БД
-                \pause\par - относительно трудоемко, но решается враппером.
-            \pause\item Переписываем другие сетевые обращения (если есть)
-                \pause\par - врапперы
+            \item Добавляем машину событий
+            \item Добавляем библиотеку fibers
+            \item Переписываем интерфейс с вебсервером (врапперы).
+            \item Переписываем интерфейс с БД (врапперы).
+            \item Переписываем другие сетевые обращения (если есть).
 
             \pause\item Итого: переписываем около 5\% кода.
+            \item PROFIT!
         \end{itemize}
     \end{block}
 \end{frame}
@@ -513,12 +538,13 @@ int main(int argc, char **argv) {
 
 \begin{frame}{Что дальше?}
     \begin{itemize}
-        \pause\item Используем fiber'ы/event-машины
+        \item Используем fiber'ы/event-машины
             в том языке к которому привыкли
-        \pause\item Рассматриваем существующие варианты
+        \item Рассматриваем существующие варианты
             \begin{itemize}
-                \item\pause Node.JS
-                    \pause\par - отказались от парадигмы fibers
+                \item Node.JS
+                    \par - отказались от парадигмы fibers
+                    \par но в последнее время появились подвижки.
                 \item\pause Tarantool...
             \end{itemize}
     \end{itemize}
@@ -527,32 +553,191 @@ int main(int argc, char **argv) {
 
 \begin{frame}{Tarantool}
     \begin{itemize}
-        \pause\item Полноценный app-сервер
-        \pause\item БД на борту
-            \pause\par - in-memory
-            \pause\par - disk
-        \pause\item Сокеты, диск, http-сервер, очереди
+        \item Полноценный app-сервер
+        \item fibers, libev
+        \item БД на борту
+            \par - in-memory
+            \par - disk
+        \item Сокеты, диск, http-сервер, очереди
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Недостатки}
     \begin{itemize}
-        \pause\item Для больших проектов одного CPU все-таки маловато
-        \pause\item Реализации fiber'ов для традиционных
+        \item Для больших проектов одного CPU все-таки маловато
+        \item Реализации fiber'ов для традиционных
             ЯП плохо масштабируются по CPU/хостам.
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Перспектива}
     \begin{itemize}
-        \pause\item Erlang
-            \pause\par - хорошее масштабирование по CPU и хостам
-            \pause\par - очень качественное решение
-            \pause\par - высокий порог вхождения
-        \pause\item Go
-            \pause\par - более низкий порог вхождения
+        \item Erlang
+            \par - хорошее масштабирование по CPU и хостам
+            \par - очень качественное решение
+            \par - высокий порог вхождения
+        \item Go
+            \par - более низкий порог вхождения
     \end{itemize}
 \end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\huge Дзен}
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{HighLoad и базы данных}
+    \begin{block}{Что делать?}
+        \begin{itemize}
+            \item Переезжать на другое железо?
+            \item Переходить на другую БД?
+        \end{itemize}
+        \par
+        \begin{itemize}
+            \pause\item Опять смотреть на архитектуру!
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+
+
+\begin{frame}{Вопрос}
+    \begin{center}
+        {\huge Что представляет из себя любая БД?}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Философия: что такое БД?}
+    \begin{itemize}
+        \pause\item Массив записей.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Философия: что такое БД?}
+    \begin{itemize}
+        \item Несколько массивов записей.
+        \pause\item Средства ускорения поиска по массиву (индексы).
+        \pause\item И...\pause ВСЕ!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Виды поисков по массиву}
+    \begin{itemize}
+        \item Сканирование: $O(N)$
+        \item Индексированный: $O(\ln N)$ (иногда $O(1)$).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Выбор из двух массивов: JOIN}
+\begin{verbatim}
+SELECT
+    *
+FROM
+    "users"
+JOIN
+    "roles" ON "users"."id" = "roles"."uid"
+WHERE
+        "roles"."id" IN (10, 20, 30)
+    AND "users"."id" IN (30, 40, 50)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Выбор из двух массивов: JOIN}
+    \begin{itemize}
+        \item Выбираются записи первого массива $K1 \cdot O(\ln{N1})$
+            \par {\small $K1$ определяется на стадии
+                выборки из первого индекса}
+        \item Сопоставляются записям второго: $K2 \cdot O(\ln{N2})$
+            \par {\small На этом шаге становится известным $K2$}
+        \item Результат фильтруется: $O(K2)$ по условиям,
+          если таковые еще не отфильтрованы.
+    \end{itemize}
+
+    \begin{block}{Итого}
+        $K1 \cdot O(\ln{N1}) + K2 \cdot O(\ln{N2}) + O(K2)$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Пути оптимизации?}
+    \begin{itemize}
+        \item Попытаться предсказать что меньше $K1$ или $K2$
+        \item Последовательные элементы из индекса иногда
+            можно выбрать за время $\ln{N} + K1 \cdot c$
+        \item Фильтрация на стадии JOIN
+
+        \item И... все?!
+
+        \pause\item Денормализация.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Усложняем задачу}
+    \begin{itemize}
+        \item Увеличиваем число таблиц в JOIN
+        \item Вводим дополнительные условия WHERE
+        \item Даже оценить ресурсы на выполнение запросов
+            становится сложно.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Поговорим об интересном}
+    \begin{block}
+        {\huge Почему популярны NoSQL?}
+        \begin{center}
+            \pause\includegraphics[scale=0.2]{img/Trollface_HD.png}
+        \end{center}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Почему популярны NoSQL?}
+    \begin{itemize}
+        \pause\item Они более быстрые?
+            \pause\par см. соседние доклады:
+                PostgreSQL быстрее MongoDB в 10 раз.
+
+        \pause\item Позволяют хранить слабоструктурированные данные?
+            \pause\par hstore, arrays, composite появились в PostgreSQL
+                много лет назад.
+
+        \pause\item Шардинг/репликация?
+            \pause\par решения для PostgreSQL существуют в избытке.
+
+        \pause\item Может быть NoSQL имеют лучшие возможности
+            по предсказанию плана выполнения запроса?
+            \pause\par большинство NoSQL не умеет JOIN.
+
+        \item Что еще?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Философия: что такое БД?}
+    \begin{itemize}
+        \item Массив(ы) записей.
+        \item Индексы.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Почему популярны noSQL?}
+    \begin{itemize}
+        \pause\item Они не умеют JOIN.
+        \pause\item Это заставляет программиста помнить о том что такое БД.
+        \pause\item Положительно влияет на архитектуру приложения.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{О БД Tarantool}
+    \begin{itemize}
+        \pause\item Это не БД.
+        \pause\item Это APP-сервер с БД на борту.
+        \pause\item JOIN не нужны: денормализация.
+    \end{itemize}
+    \begin{center}
+        \includegraphics[scale=0.2]{img/Trollface_HD.png}
+    \end{center}
+\end{frame}
+
 
 \usebackgroundtemplate{%
     \includegraphics[width=\paperwidth,height=\paperheight]{img/main-page.jpg}%

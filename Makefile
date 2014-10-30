@@ -1,7 +1,7 @@
-all: highload.pdf
+all: highload.pdf db.pdf
 
 
-highload.pdf: highload.tex
+%.pdf: %.tex
 	rm -fr obj
 	mkdir obj
 	cd obj \
@@ -10,5 +10,9 @@ highload.pdf: highload.tex
             && mv $@ ..
 	rm -fr obj
 
-evince: highload.pdf
-	evince $<
+
+evince-hl: highload.pdf
+	evince highload.pdf
+
+evince-db: db.pdf
+	evince db.pdf
