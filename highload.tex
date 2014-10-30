@@ -562,26 +562,6 @@ int main(int argc, char **argv) {
     \end{itemize}
 \end{frame}
 
-\begin{frame}
-    На данной парадигме реализован крупнейший бакенд
-    Яндекс.Такси - НАУТАКСИ.
-    \begin{itemize}
-        \item 20.000+ водителей непрерывно шлют свое местоположение
-        \item > 1 млн заявок на заказы в мес
-        \par\pause
-    \end{itemize}
-    Проект включает в себя:
-    \begin{itemize}
-        \item Вебсервер на Coro+AnyEvent
-        \item Большую коллекцию очередей на Tarantool
-        \item Систему доставки сообщений на Tarantool
-        \item Хранилище данных на PostgreSQL
-    \end{itemize}
-
-    Скачайте приложение НАУТАКСИ в андроид маркете или
-    AppleStore.
-\end{frame}
-
 \begin{frame}{Недостатки подхода}
     \begin{itemize}
         \item Для больших проектов одного CPU все-таки маловато
@@ -599,6 +579,58 @@ int main(int argc, char **argv) {
         \item Go
             \par - более низкий порог вхождения
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Наутакси}
+    Крупнейший бакенд Яндекс.Такси.
+    \begin{itemize}
+        \item 20.000+ водителей непрерывно шлют свое местоположение
+        \item > 1 млн заявок на заказы в мес
+        \par\pause
+    \end{itemize}
+
+    Проект включает в себя:
+    \begin{itemize}
+        \item Вебсервер на Coro+AnyEvent
+        \item Большую коллекцию очередей на Tarantool
+        \item Систему доставки сообщений на Tarantool
+        \item Хранилище данных на PostgreSQL
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Наутакси}
+    \begin{columns}
+        \column{.5\textwidth}
+            \includegraphics[scale=0.8]{img/nowtaxi.png}
+        \column{.5\textwidth}
+        
+        Проект обслуживает:
+        \begin{itemize}
+            \item Мобильное приложение клиента
+            \item Мобильные приложения водителя
+            \item Систему управления диспетчерскими
+            \item Мониторинг
+            \par
+            \item Все помещается на двух хостах на Hetzner
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Наутакси}
+    \begin{block}{Фичи}
+        \begin{itemize}
+            \item Можно заказать такси (подача от 5 минут)
+            \item и эвакуатор
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Ссылки}
+        \begin{itemize}
+            \item AppleStore://Наутакси
+            \item PlayMarket://Наутакси
+        \end{itemize}
+    \end{block}
+
 \end{frame}
 
 \begin{frame}
