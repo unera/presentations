@@ -312,8 +312,8 @@ int main(int argc, char **argv) {
                 \par - по моим измерениям - где-то 15\% загрузки на CPU
             \item Запустив десяток таких ``воркеров'', получаем
                 примерно такую же нагрузку как на проблемном сервере.
-            \item Понятно что пример синтетический
-                (есть вопросы к реализации usleep).
+            \par
+            \item Планировщик OS - очень тяжелый.
         \end{itemize}
     \end{block}
 
@@ -530,12 +530,12 @@ int main(int argc, char **argv) {
 
 \begin{frame}{Библиотеки и языки}
     \begin{itemize}
-        \pause\item Perl
-            \pause\par Coro + AnyEvent
-        \pause\item Python
-            \pause\par fibers + twisted
-        \pause\item PHP5
-            \pause\par появился оператор yield, fiber
+        \item Perl
+            \par Coro + AnyEvent
+        \item Python
+            \par fibers + twisted
+        \item PHP5
+            \par появился оператор yield, fiber
     \end{itemize}
 \end{frame}
 
